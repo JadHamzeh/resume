@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perk Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/css/glassmorphism-dark.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .perks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .perk-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .perk-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .perk-header {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .perk-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .perk-membership {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .perk-description {
+            color: #666;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .perk-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .perk-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vote-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .vote-btn:hover {
+            background: #e9ecef;
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .votes-count {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .no-perks {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            color: #666;
+        }
+
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: inline;
+        }
+
+        .htmx-request.htmx-indicator {
+            display: inline;
+        }
+
+        .htmx-swapping {
+            opacity: 0;
+            transition: opacity 200ms ease-out;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Perk Manager</h1>
+        <div class="user-info">
+            <span th:if="${isLoggedIn}" th:text="'Welcome, ' + ${currentUser.username} + '!'">Welcome, User!</span>
+            <a th:if="${isLoggedIn}" href="/profile" class="btn btn-primary">Profile</a>
+            <button th:if="${isLoggedIn}"
+                    hx-get="/perks/new"
+                    hx-target="#modal-content"
+                    hx-swap="innerHTML"
+                    onclick="document.getElementById('modal').classList.add('show')"
+                    class="btn btn-primary">+ Create Perk</button>
+            <a th:if="${isLoggedIn}" href="/logout" class="btn btn-secondary">Logout</a>
+            <a th:unless="${isLoggedIn}" href="/login" class="btn btn-primary">Login</a>
+            <a th:unless="${isLoggedIn}" href="/signup" class="btn btn-primary">Sign Up</a>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <form class="search-form" id="search-form" onsubmit="return false;">
+            <div class="form-group">
+                <label for="keyword">Search:</label>
+                <input type="text"
+                       id="keyword"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Search titles or descriptions..."
+                       hx-get="/perks/search-fragment"
+                       hx-trigger="keyup changed delay:500ms"
+                       hx-target="#perks-container"
+                       hx-include="#membershipType, #sortBy">
+            </div>
+            <div class="form-group">
+                <label for="membershipType">Filter by Membership:</label>
+                <select name="membershipType"
+                        id="membershipType"
+                        hx-get="/perks/search-fragment"
+                        hx-trigger="change"
+                        hx-target="#perks-container"
+                        hx-include="#keyword, #sortBy">
+                    <option value="">All Memberships</option>
+                    <option th:each="membership : ${memberships}"
+                            th:value="${membership.name}"
+                            th:text="${membership.name}"
+                            th:selected="${membership.name == selectedMembership}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sortBy">Sort by:</label>
+                <select name="sortBy"
+                        id="sortBy"
+                        hx-get="/perks/search-fragment"
+                        hx-trigger="change"
+                        hx-target="#perks-container"
+                        hx-include="#keyword, #membershipType">
+                    <option value="votes" th:selected="${sortBy == 'votes'}">Most Votes</option>
+                    <option value="expiry" th:selected="${sortBy == 'expiry'}">Expiry Date</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div id="perks-container">
+        <div th:replace="~{fragments/perk-list :: perk-list}"></div>
+    </div>
+</div>
+
+<div id="modal">
+    <div class="modal-content">
+        <div id="modal-content" style="background: none; padding: 0; box-shadow: none; border: none;">
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+        }
+    });
+
+    document.body.addEventListener('perkCreated', function() {
+        document.getElementById('modal').classList.remove('show');
+        htmx.ajax('GET', '/perks/search-fragment', {target: '#perks-container'});
+    });
+
+    document.body.addEventListener('htmx:responseError', function (event) {
+        if (event.detail.xhr.status === 401) {
+            // Open modal and load styled login page
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+
+            modalContent.innerHTML = `
+                <h1 style="color: #667eea; margin-bottom: 1.5rem; font-size: 28px; text-align: center;">Login Required</h1>
+                <div style="padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; background-color: #f8d7da; color: #ff0018; border: 1px solid #f5c6cb;">
+                    Please log in to perform this action.
+                </div>
+                <form action="/login" method="POST">
+                    <div style="margin-bottom: 1.2rem; text-align: left;">
+                        <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Username:</label>
+                        <input type="text" id="username" name="username" required autofocus style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                    <div style="margin-bottom: 1.2rem; text-align: left;">
+                        <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Password:</label>
+                        <input type="password" id="password" name="password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                    <button type="submit" style="width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s ease;">
+                        Login
+                    </button>
+                </form>
+                <p style="margin-top: 1.2rem; font-size: 14px; color: #555; text-align: center;">
+                    Don't have an account? <a href="/signup" style="color: #667eea; text-decoration: none; font-weight: 600;">Sign Up</a>
+                </p>
+            `;
+
+            modal.classList.add('show');
+        }
+    });
+</script>
+</body>
+</html>
