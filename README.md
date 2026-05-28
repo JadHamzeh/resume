@@ -26,7 +26,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/JadHamzeh/SYSC4806A-project-Group-38.git
+   git clone https://github.com/JadHamzeh/resume.git
    cd perk-manager
    ```
 
